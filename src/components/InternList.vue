@@ -1,23 +1,27 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import type { Intern } from "@/types/intern";
+import apiClient from '@/plugins/axios';
 
-const interns = ref<Intern[]>([
-  {
-    id: 1,
-    firstName: "Milos",
-    lastName: "Stojanovic",
-    avatar: "url_to_avatar",
-  },
-  { id: 2, firstName: "Reva", lastName: "Frami", avatar: "url_to_avatar" },
-]);
+const interns = ref<Intern[]>([]);
 const search = ref<string>("");
 const activePage = ref<number>(0);
-const headers = [
-  { text: "Full Name", value: "fullName" },
-  { text: "Action", value: "action", sortable: false },
-];
-const getInterns = async () => {};
+
+const getInterns = async () => {
+    try {
+        const response = await apiClient.get('/users?page=1')
+        console.log(response.data)
+        if(response.status === 200) {
+            interns.value = response.data.data
+        }
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+onMounted(() => {
+    getInterns()
+})
 </script>
 <template>
   <v-container>
@@ -39,11 +43,11 @@ const getInterns = async () => {};
         </v-col>
       </v-row>
       <v-row>
-        <v-list>
+        <v-list >
             <v-list-item v-for="(intern, index) in interns">
                 <v-row>
                     <v-col>
-                        {{ intern.firstName }} {{ intern.lastName }}
+                        {{ intern.first_name }} {{ intern.last_name }}
                     </v-col>
                     <v-col>
                         <v-icon>mdi-pencil</v-icon>
