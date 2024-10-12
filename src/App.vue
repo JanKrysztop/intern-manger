@@ -1,11 +1,13 @@
 <template>
   <v-app>
-    <v-main>
+    <v-main class="app-background">
       <router-view />
     </v-main>
   </v-app>
 </template>
 
-<script setup lang="ts">
-  //
-</script>
+<style>
+.app-background {
+  background-color: #f5f5f5;
+}
+</style>
