@@ -1,7 +1,9 @@
 <template>
   <v-app>
     <v-main class="app-background">
-      <router-view />
+      <LayoutWrapper>
+        <router-view />
+      </LayoutWrapper>
     </v-main>
   </v-app>
 </template>

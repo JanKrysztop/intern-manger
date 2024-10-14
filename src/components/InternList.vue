@@ -73,7 +73,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="d-flex justify-center align-center h-100 w-100">
     <v-container class="list-wrapper">
       <div class="text-h4 mb-6">Interns List</div>
       <v-sheet class="pa-5" rounded>
@@ -170,7 +169,6 @@ onMounted(() => {
         @update:activePage="activePage = $event"
       />
     </v-container>
-  </div>
 </template>
 
 <style scoped>
