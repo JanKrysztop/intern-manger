@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from "vue";
+import { useRouter } from 'vue-router';
 import { useDisplay } from "vuetify";
 import type { Intern } from "@/types/intern";
 import apiClient from "@/plugins/axios";
 
+const router = useRouter(); 
 const { mdAndUp, lgAndUp, xl } = useDisplay();
 
 const interns = ref<Intern[]>([]);
@@ -28,6 +30,10 @@ const getInterns = async () => {
   } finally {
     loading.value = false
   }
+};
+
+const navigateToInternForm = () => {
+  router.push('/add')
 };
 
 const editIntern = (intern: Intern) => {
@@ -86,7 +92,7 @@ onMounted(() => {
             ></v-text-field>
           </v-col>
           <v-col class="text-right">
-            <v-btn color="#459672" rounded flat height="44">
+            <v-btn @click="navigateToInternForm" color="#459672" rounded flat height="44">
               <v-icon size="17" class="pl-2 pr-6">mdi-plus-thick</v-icon>
               <p class="text-body-1 mb-0">Add User</p>
             </v-btn>
