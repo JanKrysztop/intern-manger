@@ -10,8 +10,10 @@ const interns = ref<Intern[]>([]);
 const search = ref<string>("");
 const activePage = ref<number>(1);
 const totalPages = ref<number>(0);
+const loading = ref<boolean>(false)
 
 const getInterns = async () => {
+  loading.value = true
   try {
     const response = await apiClient.get(
       `/users?page=${activePage.value}&per_page=8`
@@ -23,6 +25,8 @@ const getInterns = async () => {
     }
   } catch (error) {
     console.log(error);
+  } finally {
+    loading.value = false
   }
 };
 
@@ -89,6 +93,7 @@ onMounted(() => {
           </v-col>
         </v-row>
         <v-divider></v-divider>
+        <v-progress-linear v-if="loading" color="#459672" indeterminate></v-progress-linear>
         <v-row>
           <v-col>
             <v-list>
