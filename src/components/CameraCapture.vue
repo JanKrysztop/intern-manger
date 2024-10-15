@@ -4,7 +4,6 @@ import { ref, defineProps, defineEmits, onBeforeUnmount } from "vue";
 defineProps<{
   photo: string;
   isCameraActive: boolean;
-  onPhotoCaptured: Function;
 }>();
 
 const emit = defineEmits<{
@@ -18,7 +17,7 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 const stream = ref<MediaStream | null>(null);
 
 const startCamera = async (): Promise<void> => {
-    emit("starCamera", null, true)
+  emit("starCamera", null, true);
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
@@ -34,7 +33,7 @@ const startCamera = async (): Promise<void> => {
 const stopCamera = (): void => {
   if (stream.value) {
     stream.value.getTracks().forEach((track) => track.stop());
-    emit("stopCamera", false)
+    emit("stopCamera", false);
   }
 };
 
