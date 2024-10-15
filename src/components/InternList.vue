@@ -14,6 +14,7 @@ const search = ref<string>("");
 const activePage = ref<number>(1);
 const totalPages = ref<number>(0);
 const loading = ref<boolean>(false)
+const errorSnackbar = ref<boolean>(false)
 
 const getInterns = async () => {
   loading.value = true
@@ -21,13 +22,13 @@ const getInterns = async () => {
     const response = await apiClient.get(
       `/users?page=${activePage.value}&per_page=8`
     );
-    console.log(response.data);
     if (response.status === 200) {
       interns.value = response.data.data;
       totalPages.value = response.data.total_pages;
     }
   } catch (error) {
-    console.log(error);
+    console.log("Error getting interns",error);
+    errorSnackbar.value = true
   } finally {
     loading.value = false
   }
@@ -60,7 +61,6 @@ const filteredInterns = computed(() => {
 });
 
 watch(activePage, () => {
-  console.log("im watching here", activePage.value);
   getInterns();
 });
 
@@ -98,7 +98,7 @@ onMounted(() => {
         <v-progress-linear v-if="loading" color="#459672" indeterminate></v-progress-linear>
         <v-row>
           <v-col>
-            <v-list>
+            <v-list v-if="filteredInterns.length > 0">
               <v-list-item class="pl-0">
                 <div class="d-flex align-center justify-space-between px-2">
                   <div class="d-flex align-center">
@@ -157,6 +157,7 @@ onMounted(() => {
                 </div>
               </v-list-item>
             </v-list>
+            <div v-else class="text-h6 d-flex justify-center py-10">This interns list is empty</div>
           </v-col>
         </v-row>
       </v-sheet>
@@ -165,6 +166,13 @@ onMounted(() => {
         :totalPages="totalPages"
         @update:activePage="activePage = $event"
       />
+      <v-snackbar
+        v-model="errorSnackbar"
+        color="error"
+        rounded
+      >
+      An error occurred while retrieving the interns list. Please try again later.
+      </v-snackbar>
     </v-container>
 </template>
 
