@@ -10,7 +10,7 @@ const { smAndDown } = useDisplay();
     <div class="text-h4 mb-6">Add Intern</div>
     <v-row class="h-75">
       <v-col cols="12" md="8" class="h-75 pb-10" :order="smAndDown ? 1 : 0">
-        <v-sheet class="pa-5 px-8 h-100 constraints">
+        <v-sheet class="d-flex flex-column pa-5 px-8 h-100 constraints">
           <v-row class="mt-12 h-75">
             <v-col cols="12" md="6">
               <label for="first-name-input" class="font-weight-bold"
@@ -36,24 +36,32 @@ const { smAndDown } = useDisplay();
             /></v-col>
           </v-row>
 
-          <v-btn color="#459672" flat height="44" :block="smAndDown">
+          <v-btn
+            color="#459672"
+            flat
+            height="44"
+            width="120"
+            :block="smAndDown"
+            :class="smAndDown && 'mt-6'"
+          >
             <p class="text-body-1 mb-0">Add Intern</p>
           </v-btn>
         </v-sheet>
       </v-col>
       <v-col cols="12" md="4" class="h-75 pb-10">
-        <v-sheet class="pa-5 px-8 h-100 constraints" rounded>
-          <v-row class="mt-10 h-75 d-flex justify-center">
+        <v-sheet
+          class="d-flex flex-column align-center pa-5 px-8 h-100 constraints"
+          rounded
+        >
+          <v-row class="mt-10 h-75">
             <v-avatar class="avatar" :image="avatar" size="140"></v-avatar>
           </v-row>
-
           <v-btn
-            class="mt-2"
+            class="w-100"
+            color="#636C73"
             flat
             height="44"
-            block
             variant="outlined"
-            color="#636C73"
           >
             <v-icon class="mr-2">mdi-camera</v-icon>
             <p class="text-body-1 mb-0">Add Photo</p>

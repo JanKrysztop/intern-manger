@@ -1,15 +1,11 @@
 <template>
   <v-app>
-    <v-main class="app-background">
-      <LayoutWrapper>
+    <LayoutWrapper>
+      <v-main>
         <router-view />
-      </LayoutWrapper>
-    </v-main>
+      </v-main>
+    </LayoutWrapper>
   </v-app>
 </template>
 
-<style>
-.app-background {
-  background-color: #f5f5f5;
-}
-</style>
+<style></style>
