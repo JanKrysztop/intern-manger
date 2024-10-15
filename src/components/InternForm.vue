@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from "vue";
 import { useDisplay } from "vuetify";
+import { useRouter } from 'vue-router';
+import apiClient from "@/plugins/axios";
 import avatar from "@/assets/avatar.svg";
 
 const { smAndDown } = useDisplay();
+const router = useRouter(); 
+
 const firstName = ref<string | null>(null);
 const lastName = ref<string | null>(null);
-const valueRequired = [(v: any) => !!v || "Field is required"];
 const isCameraActive = ref<boolean>(false);
 const photo = ref<string | null>(null);
 const video = ref<HTMLVideoElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
 const stream = ref<MediaStream | null>(null);
+const loading = ref<boolean>(false);
+const successSnackbar = ref<boolean>(false);
+const errorSnackbar = ref<boolean>(false);
+const snackbarText = ref<string>("");
+
+const valueRequired = [(v: any) => !!v || "Field is required"];
 
 const startCamera = async (): Promise<void> => {
+  photo.value = null;
   isCameraActive.value = true;
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({
@@ -44,8 +54,16 @@ const capturePhoto = (): void => {
 
     ctx.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
 
-    photo.value = canvas.value.toDataURL("image/png");
-    console.log(photo.value);
+    canvas.value.toBlob((blob) => {
+      if (blob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          photo.value = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      }
+    }, "image/jpeg", 0.7);
+
     stopCamera();
   }
 };
@@ -53,8 +71,35 @@ const capturePhoto = (): void => {
 const internFormRef = ref();
 const handleFormSubmit = async () => {
   const isFormValid = await internFormRef.value.validate();
-  if (isFormValid.valid) {
-    console.log();
+  errorSnackbar.value = !photo.value;
+  snackbarText.value = "Please take a photo before submitting the form.";
+  if (isFormValid.valid && photo.value) {
+    loading.value = true;
+
+    //This payload is deliberately not matching the one from API documentation for showcase purposes as there is no validation set on this route.
+    const payload = {
+      name: firstName.value,
+      lastName: lastName.value,
+      avatar: photo.value
+    };
+
+    try {
+      const response = await apiClient.post("/users", payload);
+      if (response.status === 201) {
+        successSnackbar.value = true;
+        snackbarText.value = "New intern successfully created!";
+        setTimeout(() => {
+          router.push('/')
+        },2000)
+      }
+    } catch (error) {
+      console.log(error);
+      errorSnackbar.value = true;
+      snackbarText.value =
+        "An error occured while adding new intern, please try again.";
+    } finally {
+      loading.value = false;
+    }
   }
 };
 
@@ -107,6 +152,7 @@ onBeforeUnmount(() => {
               width="120"
               :block="smAndDown"
               :class="smAndDown && 'mt-6'"
+              :loading="loading"
             >
               <p class="text-body-1 mb-0">Add Intern</p>
             </v-btn>
@@ -156,6 +202,20 @@ onBeforeUnmount(() => {
           </v-sheet>
         </v-col>
       </v-row>
+      <v-snackbar
+        v-model="errorSnackbar"
+        :text="snackbarText"
+        color="error"
+        rounded
+      >
+      </v-snackbar>
+      <v-snackbar
+        v-model="successSnackbar"
+        :text="snackbarText"
+        color="success"
+        rounded
+      >
+      </v-snackbar>
     </v-form>
   </v-container>
 </template>
