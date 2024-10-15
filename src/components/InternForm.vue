@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useDisplay } from "vuetify";
 import { useRouter } from "vue-router";
 import apiClient from "@/plugins/axios";
@@ -12,9 +12,6 @@ const lastName = ref<string | null>(null);
 const internId = ref<string>("");
 const isCameraActive = ref<boolean>(false);
 const photo = ref<string | null>(null);
-const video = ref<HTMLVideoElement | null>(null);
-const canvas = ref<HTMLCanvasElement | null>(null);
-const stream = ref<MediaStream | null>(null);
 const loading = ref<boolean>(false);
 const successSnackbar = ref<boolean>(false);
 const errorSnackbar = ref<boolean>(false);
@@ -22,55 +19,6 @@ const snackbarText = ref<string>("");
 const isDeleteDialogVisible = ref(false);
 const internFormRef = ref();
 const valueRequired = [(v: any) => !!v || "Field is required"];
-
-const startCamera = async (): Promise<void> => {
-  photo.value = null;
-  isCameraActive.value = true;
-  try {
-    stream.value = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user" },
-    });
-    if (video.value) {
-      video.value.srcObject = stream.value;
-    }
-  } catch (error) {
-    console.error("Error accessing camera:", error);
-    isCameraActive.value = false;
-  }
-};
-
-const stopCamera = (): void => {
-  if (stream.value) {
-    stream.value.getTracks().forEach((track) => track.stop());
-    isCameraActive.value = false;
-  }
-};
-
-const capturePhoto = (): void => {
-  const ctx = canvas.value?.getContext("2d");
-  if (ctx && video.value && canvas.value) {
-    canvas.value.width = video.value.videoWidth;
-    canvas.value.height = video.value.videoHeight;
-
-    ctx.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
-
-    canvas.value.toBlob(
-      (blob) => {
-        if (blob) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            photo.value = reader.result as string;
-          };
-          reader.readAsDataURL(blob);
-        }
-      },
-      "image/jpeg",
-      0.7
-    );
-
-    stopCamera();
-  }
-};
 
 const addIntern = async (payload: {
   name: string;
@@ -89,7 +37,7 @@ const addIntern = async (payload: {
       }, 2000);
     }
   } catch (error) {
-    console.log("Error while adding intern:",error);
+    console.error("Error while adding intern:", error);
     errorSnackbar.value = true;
     snackbarText.value =
       "An error occured while adding new intern, please try again.";
@@ -165,22 +113,33 @@ const closeDeleteDialog = () => {
 };
 
 const deleteIntern = async () => {
-    try {
-      await apiClient.delete(`/users/${internId}`);
-      console.log("Intern deleted successfully!");
-      successSnackbar.value = true;
-      snackbarText.value = "Intern deleted successfully!";
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
-
-    } catch (error) {
-      console.error("Error deleting intern:", error);
-      errorSnackbar.value = true;
+  try {
+    await apiClient.delete(`/users/${internId}`);
+    successSnackbar.value = true;
+    snackbarText.value = "Intern deleted successfully!";
+    setTimeout(() => {
+      router.push("/");
+    }, 2000);
+  } catch (error) {
+    console.error("Error deleting intern:", error);
+    errorSnackbar.value = true;
     snackbarText.value = "An error occurred while deleting intern.";
-    }
-  
+  }
+
   closeDeleteDialog();
+};
+
+const onPhotoCaptured = (photoUrl: string) => {
+  photo.value = photoUrl;
+};
+
+const onStartCamera = () => {
+  photo.value = null;
+  isCameraActive.value = true;
+};
+
+const onStopCamera = () => {
+  isCameraActive.value = false;
 };
 
 onMounted(() => {
@@ -188,10 +147,6 @@ onMounted(() => {
   if (internId.value) {
     fetchIntern(internId.value);
   }
-});
-
-onBeforeUnmount(() => {
-  stopCamera();
 });
 </script>
 
@@ -270,47 +225,13 @@ onBeforeUnmount(() => {
           </v-sheet>
         </v-col>
         <v-col cols="12" md="4" class="h-75 pb-10">
-          <v-sheet
-            class="d-flex flex-column align-center pa-5 px-8 h-100 constraints"
-            rounded
-          >
-            <v-avatar
-              v-if="!isCameraActive && !photo"
-              class="avatar mt-10"
-              image="/avatar.svg" 
-              size="140"
-            ></v-avatar>
-            <v-avatar
-              v-else-if="!isCameraActive && photo"
-              class="avatar mt-10"
-              :image="photo"
-              size="140"
-            ></v-avatar>
-            <video
-              v-else
-              ref="video"
-              autoplay
-              playsinline
-              width="140"
-              height="140"
-              class="video-circle avatar mt-10"
-            ></video>
-            <v-spacer></v-spacer>
-            <v-btn
-              @click="!isCameraActive ? startCamera() : capturePhoto()"
-              id="photo_btn"
-              class="w-100"
-              color="#636C73"
-              flat
-              height="44"
-              variant="outlined"
-            >
-              <v-icon class="mr-2">mdi-camera</v-icon>
-              <p v-if="!isCameraActive" class="text-body-1 mb-0">Add Photo</p>
-              <p v-else class="text-body-1 mb-0">Take Photo</p>
-            </v-btn>
-            <canvas ref="canvas" style="display: none"></canvas>
-          </v-sheet>
+          <CameraCapture
+            :photo="photo"
+            :isCameraActive="isCameraActive"
+            @photoCaptured="onPhotoCaptured"
+            @starCamera="onStartCamera"
+            @stopCamera="onStopCamera"
+          />
         </v-col>
       </v-row>
       <v-snackbar

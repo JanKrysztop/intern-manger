@@ -27,7 +27,7 @@ const getInterns = async () => {
       totalPages.value = response.data.total_pages;
     }
   } catch (error) {
-    console.log("Error getting interns",error);
+    console.error("Error getting interns",error);
     errorSnackbar.value = true
   } finally {
     loading.value = false

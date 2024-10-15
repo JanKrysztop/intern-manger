@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CameraCapture: typeof import('./src/components/CameraCapture.vue')['default']
     DeleteDialog: typeof import('./src/components/ui/DeleteDialog.vue')['default']
     InternForm: typeof import('./src/components/InternForm.vue')['default']
     InternList: typeof import('./src/components/InternList.vue')['default']
