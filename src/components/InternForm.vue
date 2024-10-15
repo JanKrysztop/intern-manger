@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
                   variant="outlined"
               /></v-col>
             </v-row>
-            <div class="d-flex justify-space-between">
+            <div :class="!smAndDown && 'd-flex justify-space-between'">
               <v-btn
                 id="intern_form_submit_btn"
                 type="submit"

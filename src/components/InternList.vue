@@ -6,6 +6,7 @@ import type { Intern } from "@/types/intern";
 import apiClient from "@/plugins/axios";
 
 const router = useRouter(); 
+const { smAndDown } = useDisplay();
 const { mdAndUp, lgAndUp, xl } = useDisplay();
 
 const interns = ref<Intern[]>([]);
@@ -73,21 +74,21 @@ onMounted(() => {
       <div class="text-h4 mb-6">Interns List</div>
       <v-sheet class="pa-5" rounded>
         <v-row>
-          <v-col cols="3">
+          <v-col cols="12" md="3" :order="smAndDown ? 1 : 0">
             <v-text-field
               v-model="search"
               placeholder="Search for interns..."
               density="compact"
               variant="solo-filled"
               append-inner-icon="mdi-magnify"
-              min-width="220"
+              
               clearable
               flat
               single-line
             ></v-text-field>
           </v-col>
-          <v-col class="text-right">
-            <v-btn @click="navigateToInternForm" color="#459672" rounded flat height="44">
+          <v-col class="text-right" cols="12" md="9">
+            <v-btn @click="navigateToInternForm" color="#459672" rounded flat height="44" :block="smAndDown">
               <v-icon size="17" class="pl-2 pr-6">mdi-plus-thick</v-icon>
               <p class="text-body-1 mb-0">Add Intern</p>
             </v-btn>
