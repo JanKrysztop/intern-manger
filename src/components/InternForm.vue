@@ -116,6 +116,8 @@ const updateIntern = async (
     console.error("Error updating intern data:", error);
     errorSnackbar.value = true;
     snackbarText.value = "An error occurred while updating intern data.";
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -130,6 +132,7 @@ const handleFormSubmit = async () => {
       lastName: lastName.value as string,
       avatar: photo.value as string,
     };
+
     if (internId.value) {
       updateIntern(internId.value, payload);
     } else {
