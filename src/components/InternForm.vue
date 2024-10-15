@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import { useDisplay } from "vuetify";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 import apiClient from "@/plugins/axios";
 import avatar from "@/assets/avatar.svg";
 
 const { smAndDown } = useDisplay();
-const router = useRouter(); 
+const router = useRouter();
 
 const firstName = ref<string | null>(null);
 const lastName = ref<string | null>(null);
+const internId = ref<string>("");
 const isCameraActive = ref<boolean>(false);
 const photo = ref<string | null>(null);
 const video = ref<HTMLVideoElement | null>(null);
@@ -19,7 +20,7 @@ const loading = ref<boolean>(false);
 const successSnackbar = ref<boolean>(false);
 const errorSnackbar = ref<boolean>(false);
 const snackbarText = ref<string>("");
-
+const internFormRef = ref();
 const valueRequired = [(v: any) => !!v || "Field is required"];
 
 const startCamera = async (): Promise<void> => {
@@ -46,7 +47,6 @@ const stopCamera = (): void => {
 };
 
 const capturePhoto = (): void => {
-  console.log("FLASH !");
   const ctx = canvas.value?.getContext("2d");
   if (ctx && video.value && canvas.value) {
     canvas.value.width = video.value.videoWidth;
@@ -54,54 +54,110 @@ const capturePhoto = (): void => {
 
     ctx.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
 
-    canvas.value.toBlob((blob) => {
-      if (blob) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          photo.value = reader.result as string;
-        };
-        reader.readAsDataURL(blob);
-      }
-    }, "image/jpeg", 0.7);
+    canvas.value.toBlob(
+      (blob) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            photo.value = reader.result as string;
+          };
+          reader.readAsDataURL(blob);
+        }
+      },
+      "image/jpeg",
+      0.7
+    );
 
     stopCamera();
   }
 };
+const addIntern = async (payload: {
+  name: string;
+  lastName: string;
+  avatar: string;
+}) => {
+  loading.value = true;
 
-const internFormRef = ref();
+  try {
+    const response = await apiClient.post("/users", payload);
+    if (response.status === 201) {
+      successSnackbar.value = true;
+      snackbarText.value = "New intern successfully created!";
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    }
+  } catch (error) {
+    console.log(error);
+    errorSnackbar.value = true;
+    snackbarText.value =
+      "An error occured while adding new intern, please try again.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+const updateIntern = async (
+  internId: string,
+  payload: { name: string; lastName: string; avatar: string }
+) => {
+  loading.value = true;
+
+  try {
+    const response = await apiClient.patch(`/users/${internId}`, payload);
+    if (response.status === 200) {
+      successSnackbar.value = true;
+      snackbarText.value = "Intern updated successfully!";
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    }
+  } catch (error) {
+    console.error("Error updating intern data:", error);
+    errorSnackbar.value = true;
+    snackbarText.value = "An error occurred while updating intern data.";
+  }
+};
+
 const handleFormSubmit = async () => {
   const isFormValid = await internFormRef.value.validate();
   errorSnackbar.value = !photo.value;
   snackbarText.value = "Please take a photo before submitting the form.";
   if (isFormValid.valid && photo.value) {
-    loading.value = true;
-
     //This payload is deliberately not matching the one from API documentation for showcase purposes as there is no validation set on this route.
     const payload = {
-      name: firstName.value,
-      lastName: lastName.value,
-      avatar: photo.value
+      name: firstName.value as string,
+      lastName: lastName.value as string,
+      avatar: photo.value as string,
     };
-
-    try {
-      const response = await apiClient.post("/users", payload);
-      if (response.status === 201) {
-        successSnackbar.value = true;
-        snackbarText.value = "New intern successfully created!";
-        setTimeout(() => {
-          router.push('/')
-        },2000)
-      }
-    } catch (error) {
-      console.log(error);
-      errorSnackbar.value = true;
-      snackbarText.value =
-        "An error occured while adding new intern, please try again.";
-    } finally {
-      loading.value = false;
+    if (internId.value) {
+      updateIntern(internId.value, payload);
+    } else {
+      addIntern(payload);
     }
   }
 };
+
+const fetchIntern = async (internId: string) => {
+  try {
+    const response = await apiClient.get(`/users/${internId}`);
+    const internData = response.data.data;
+    firstName.value = internData.first_name;
+    lastName.value = internData.last_name;
+    photo.value = internData.avatar;
+  } catch (error) {
+    console.error("Error fetching intern data:", error);
+    errorSnackbar.value = true;
+    snackbarText.value = "An error occurred while fetching intern data.";
+  }
+};
+
+onMounted(() => {
+  internId.value = router.currentRoute.value.params.id as string;
+  if (internId.value) {
+    fetchIntern(internId.value);
+  }
+});
 
 onBeforeUnmount(() => {
   stopCamera();
@@ -154,7 +210,8 @@ onBeforeUnmount(() => {
               :class="smAndDown && 'mt-6'"
               :loading="loading"
             >
-              <p class="text-body-1 mb-0">Add Intern</p>
+              <p v-if="!internId" class="text-body-1 mb-0">Add Intern</p>
+              <p v-else class="text-body-1 mb-0">Edit Intern</p>
             </v-btn>
           </v-sheet>
         </v-col>

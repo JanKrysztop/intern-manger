@@ -37,7 +37,7 @@ const navigateToInternForm = () => {
 };
 
 const editIntern = (intern: Intern) => {
-  console.log(intern);
+  router.push(`/edit/${intern.id}`)
 };
 
 const deleteIntern = (id: number) => {
