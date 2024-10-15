@@ -7,5 +7,3 @@
     </LayoutWrapper>
   </v-app>
 </template>
-
-<style></style>
