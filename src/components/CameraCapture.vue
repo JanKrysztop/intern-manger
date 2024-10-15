@@ -2,7 +2,7 @@
 import { ref, defineProps, defineEmits, onBeforeUnmount } from "vue";
 
 defineProps<{
-  photo: string;
+  photo: string | null;
   isCameraActive: boolean;
 }>();
 
