@@ -37,7 +37,7 @@ const navigateToInternForm = () => {
 };
 
 const editIntern = (intern: Intern) => {
-  console.log(intern);
+  router.push(`/edit/${intern.id}`)
 };
 
 const deleteIntern = (id: number) => {
@@ -73,15 +73,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="d-flex justify-center align-center h-100 w-100">
-    <v-container class="list-wrapper">
+    <v-container>
       <div class="text-h4 mb-6">Interns List</div>
       <v-sheet class="pa-5" rounded>
         <v-row>
           <v-col cols="3">
             <v-text-field
               v-model="search"
-              label="Search for users..."
+              placeholder="Search for interns..."
               density="compact"
               variant="solo-filled"
               append-inner-icon="mdi-magnify"
@@ -94,7 +93,7 @@ onMounted(() => {
           <v-col class="text-right">
             <v-btn @click="navigateToInternForm" color="#459672" rounded flat height="44">
               <v-icon size="17" class="pl-2 pr-6">mdi-plus-thick</v-icon>
-              <p class="text-body-1 mb-0">Add User</p>
+              <p class="text-body-1 mb-0">Add Intern</p>
             </v-btn>
           </v-col>
         </v-row>
@@ -170,7 +169,6 @@ onMounted(() => {
         @update:activePage="activePage = $event"
       />
     </v-container>
-  </div>
 </template>
 
 <style scoped>
