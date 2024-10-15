@@ -3,7 +3,6 @@ import { onMounted, onBeforeUnmount, ref } from "vue";
 import { useDisplay } from "vuetify";
 import { useRouter } from "vue-router";
 import apiClient from "@/plugins/axios";
-import avatar from "@/assets/avatar.svg";
 
 const { smAndDown } = useDisplay();
 const router = useRouter();
@@ -278,7 +277,7 @@ onBeforeUnmount(() => {
             <v-avatar
               v-if="!isCameraActive && !photo"
               class="avatar mt-10"
-              :image="avatar"
+              image="/avatar.svg" 
               size="140"
             ></v-avatar>
             <v-avatar

@@ -11,6 +11,7 @@ declare module 'vue' {
     InternForm: typeof import('./src/components/InternForm.vue')['default']
     InternList: typeof import('./src/components/InternList.vue')['default']
     LayoutWrapper: typeof import('./src/components/layouts/LayoutWrapper.vue')['default']
+    NotFound: typeof import('./src/components/NotFound.vue')['default']
     Pagination: typeof import('./src/components/ui/Pagination.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
