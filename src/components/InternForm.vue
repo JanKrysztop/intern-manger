@@ -20,6 +20,7 @@ const loading = ref<boolean>(false);
 const successSnackbar = ref<boolean>(false);
 const errorSnackbar = ref<boolean>(false);
 const snackbarText = ref<string>("");
+const isDeleteDialogVisible = ref(false);
 const internFormRef = ref();
 const valueRequired = [(v: any) => !!v || "Field is required"];
 
@@ -71,6 +72,7 @@ const capturePhoto = (): void => {
     stopCamera();
   }
 };
+
 const addIntern = async (payload: {
   name: string;
   lastName: string;
@@ -88,7 +90,7 @@ const addIntern = async (payload: {
       }, 2000);
     }
   } catch (error) {
-    console.log(error);
+    console.log("Error while adding intern:",error);
     errorSnackbar.value = true;
     snackbarText.value =
       "An error occured while adding new intern, please try again.";
@@ -155,6 +157,33 @@ const fetchIntern = async (internId: string) => {
   }
 };
 
+const openDeleteDialog = () => {
+  isDeleteDialogVisible.value = true;
+};
+
+const closeDeleteDialog = () => {
+  isDeleteDialogVisible.value = false;
+};
+
+const deleteIntern = async () => {
+    try {
+      await apiClient.delete(`/users/${internId}`);
+      console.log("Intern deleted successfully!");
+      successSnackbar.value = true;
+      snackbarText.value = "Intern deleted successfully!";
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error deleting intern:", error);
+      errorSnackbar.value = true;
+    snackbarText.value = "An error occurred while deleting intern.";
+    }
+  
+  closeDeleteDialog();
+};
+
 onMounted(() => {
   internId.value = router.currentRoute.value.params.id as string;
   if (internId.value) {
@@ -169,7 +198,13 @@ onBeforeUnmount(() => {
 
 <template>
   <v-container>
-    <div class="text-h4 mb-6">Add Intern</div>
+    <DeleteDialog
+      :isVisible="isDeleteDialogVisible"
+      :onDelete="deleteIntern"
+      :onClose="closeDeleteDialog"
+    />
+    <div v-if="!internId" class="text-h4 mb-6">Add Intern</div>
+    <div v-else class="text-h4 mb-6">Edit Intern</div>
     <v-form ref="internFormRef" @submit.prevent="handleFormSubmit">
       <v-row class="h-75">
         <v-col cols="12" md="8" class="h-75 pb-10" :order="smAndDown ? 1 : 0">
@@ -202,20 +237,37 @@ onBeforeUnmount(() => {
                   variant="outlined"
               /></v-col>
             </v-row>
-            <v-btn
-              id="inter_form_submit_btn"
-              type="submit"
-              color="#459672"
-              flat
-              height="44"
-              width="120"
-              :block="smAndDown"
-              :class="smAndDown && 'mt-6'"
-              :loading="loading"
-            >
-              <p v-if="!internId" class="text-body-1 mb-0">Add Intern</p>
-              <p v-else class="text-body-1 mb-0">Edit Intern</p>
-            </v-btn>
+            <div class="d-flex justify-space-between">
+              <v-btn
+                id="intern_form_submit_btn"
+                type="submit"
+                color="#459672"
+                flat
+                height="44"
+                width="120"
+                :block="smAndDown"
+                :class="smAndDown && 'mt-6'"
+                :loading="loading"
+              >
+                <p v-if="!internId" class="text-body-1 mb-0">Add Intern</p>
+                <p v-else class="text-body-1 mb-0">Edit Intern</p>
+              </v-btn>
+              <v-btn
+                @click="openDeleteDialog()"
+                v-if="internId"
+                id="intern_delete_btn"
+                type="button"
+                color="error"
+                flat
+                height="44"
+                width="120"
+                :block="smAndDown"
+                :class="smAndDown && 'mt-6'"
+                :loading="loading"
+              >
+                <p class="text-body-1 mb-0">Delete Intern</p>
+              </v-btn>
+            </div>
           </v-sheet>
         </v-col>
         <v-col cols="12" md="4" class="h-75 pb-10">

@@ -40,10 +40,6 @@ const editIntern = (intern: Intern) => {
   router.push(`/edit/${intern.id}`)
 };
 
-const deleteIntern = (id: number) => {
-  console.log(id);
-};
-
 const computedMargin = computed(() => {
   if (xl.value) return "64px";
   if (lgAndUp.value) return "32px";
@@ -148,7 +144,7 @@ onMounted(() => {
                     </v-btn>
                     <v-btn
                       variant="plain"
-                      @click="deleteIntern(intern.id)"
+                      @click="editIntern(intern)"
                       size="xs"
                     >
                       <v-icon>mdi-delete</v-icon>
