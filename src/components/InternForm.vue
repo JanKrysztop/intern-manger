@@ -114,7 +114,7 @@ const closeDeleteDialog = () => {
 
 const deleteIntern = async () => {
   try {
-    await apiClient.delete(`/users/${internId}`);
+    await apiClient.delete(`/users/${internId.value}`);
     successSnackbar.value = true;
     snackbarText.value = "Intern deleted successfully!";
     setTimeout(() => {
