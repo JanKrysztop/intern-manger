@@ -91,6 +91,6 @@ To deploy this application on GitHub Pages, follow these steps:
 Access the deployed application at:
 
 ```
-https://jankrysztop.github.io/intern-manger/
+https://intern-manager-nine.vercel.app/
 ```
 
